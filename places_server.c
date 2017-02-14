@@ -61,36 +61,32 @@ getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 
 	CLIENT *clnt;
 	nearest_results_air  *result_1;
-	geoLocation  getnearest_air_1_arg;
+	geoLocation getnearest_air_1_arg;
 
 	getnearest_air_1_arg.longitude = 91.12;
 	getnearest_air_1_arg.latitude = 12.23;
 
 // Touch on this later
-// #ifndef DEBUG
-// 	clnt = clnt_create ("localhost", airportProgram, airport_version, "udp");
-// 	if (clnt == NULL) {
-// 		clnt_pcreateerror ("localhost");
-// 		exit (1);
-// 	}
-// #endif  /* DEBUG */
+#ifndef DEBUG
+	clnt = clnt_create ("localhost", airportProgram, airport_version, "udp");
+	if (clnt == NULL) {
+		clnt_pcreateerror ("localhost");
+		exit (1);
+	}
+#endif  /* DEBUG */
 
-// 	result_1 = getnearest_air_1(&getnearest_air_1_arg, clnt);
-// 	if (result_1 == (nearest_results_air *) NULL) {
-// 		clnt_perror (clnt, "call failed");
-// 	} else{
-// 		if (result_1->err == 0){
-// 			result->x = result_1->x;
-// 		}
-// 	}
-
-
+	result_1 = getnearest_air_1(&getnearest_air_1_arg, clnt);
+	if (result_1 == (nearest_results_air *) NULL) {
+		clnt_perror (clnt, "call failed");
+	} else{
+		if (result_1->err == 0){
+			result.nearest_results_place_u.x = result_1->nearest_results_air_u.x;
+		}
+	}
 
 	/*
 	 * insert server code here
 	 */
-
-
 
 	return &result;
 
