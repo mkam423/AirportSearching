@@ -7,6 +7,7 @@
 #define _AIRPORTS_H_RPCGEN
 
 #include <rpc/rpc.h>
+#include "kdtree.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +46,15 @@ struct nearest_results_air {
 	} nearest_results_air_u;
 };
 typedef struct nearest_results_air nearest_results_air;
+
+typedef struct node {
+	char * airportCode;
+	char * city;
+	char * state;
+	struct node * next;
+} node_t;
+
+void *kd = NULL;
 
 #define airportProgram 0x12345679
 #define airport_version 1

@@ -28,7 +28,7 @@ struct State
 	int numberOfCityOrTown;
 };
 
-void initializeData(State listOfState[], CityOrTown listOfCityOrTownByState[52][250]);
+void initializeData(State listOfState[], CityOrTown listOfCityOrTownByState[52][2000]);
 
 nearest_results_place *
 getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
@@ -36,22 +36,23 @@ getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 	static nearest_results_place result;
 	static int ifNotInitialized = 0;
 	static State listOfState[52];
-	static CityOrTown listOfCityOrTownByState[52][250];
+	static CityOrTown listOfCityOrTownByState[52][2000];
 
 	if(ifNotInitialized == 0)
 	{
+		printf("Initialize data: \n");
 		initializeData(listOfState, listOfCityOrTownByState);
 	}
 
-	int i,j;
-	for(i = 0; i < 52; i++)
-	{
-		printf("%s:------------------------\n", listOfState[i].stateAbbreviation);
-		for(j = 0; j < listOfState[i].numberOfCityOrTown; j++)
-		{
-			printf("%s\n", listOfCityOrTownByState[i][j].cityOrTownName);
-		}
-	}
+	// int i,j;
+	// for(i = 0; i < 52; i++)
+	// {
+	// 	printf("%s:------------------------\n", listOfState[i].stateAbbreviation);
+	// 	for(j = 0; j < listOfState[i].numberOfCityOrTown; j++)
+	// 	{
+	// 		printf("%s\n", listOfCityOrTownByState[i][j].cityOrTownName);
+	// 	}
+	// }
 
 	xdr_free((xdrproc_t)xdr_nearest_results_air, (char*)&result);
 
@@ -84,15 +85,22 @@ getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 		}
 	}
 
-	/*
-	 * insert server code here
-	 */
+	// airList_air walker = result_1->nearest_results_air_u.x;
+	// while(walker)
+	// {
+	// 	printf("Code: %s\n", walker->p.code);
+	// 	printf("Name: %s\n", walker->p.name);
+	// 	printf("Distance: %f\n", walker->p.dist);
+	// 	printf("Longitude: %f\n", walker->p.loc.longitude);
+	// 	printf("Latitude: %f\n", walker->p.loc.latitude);
+	// 	walker = walker->next;
+	// }
 
 	return &result;
 
 }
 
-void initializeData(State listOfState[], CityOrTown listOfCityOrTownByState[52][250])
+void initializeData(State listOfState[], CityOrTown listOfCityOrTownByState[52][2000])
 {
 	FILE * fp = NULL;
 

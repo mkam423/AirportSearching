@@ -48,7 +48,7 @@ struct nearest_results_place {
 };
 typedef struct nearest_results_place nearest_results_place;
 
-#define placesProgram 0x12345678
+#define placesProgram 0x1234567800
 #define places_version 1
 
 #if defined(__STDC__) || defined(__cplusplus)

@@ -11,6 +11,7 @@
 #include <memory.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <stdbool.h>
 
 #ifndef SIG_PF
 #define SIG_PF void(*)(int)
@@ -57,10 +58,19 @@ airportprogram_1(struct svc_req *rqstp, register SVCXPRT *transp)
 	return;
 }
 
+const int kdtreeDimension = 2;
+
+
+
+void initialize();
+
 int
 main (int argc, char **argv)
 {
 	register SVCXPRT *transp;
+
+	kd = kd_create(kdtreeDimension);
+	initialize();
 
 	pmap_unset (airportProgram, airport_version);
 
@@ -86,6 +96,119 @@ main (int argc, char **argv)
 
 	svc_run ();
 	fprintf (stderr, "%s", "svc_run returned");
+
+	//kd_free(kd);
+
 	exit (1);
 	/* NOTREACHED */
+}
+
+void initialize()
+{
+	FILE *fp;
+	char myLineBuffer[70];
+	char * word;
+	ssize_t length;
+	bool check;
+	char comma = ',';
+
+	// fp = fopen("test.txt", "r");
+	fp = fopen("airport-locations.txt", "r");
+
+	if(kd == NULL) printf("It is freaking NULL\n");
+
+	printf("initialize Data: started!!!\n");
+
+	if(fp == NULL)
+	{
+		perror("Error opening file");
+	}
+	while(fgets(myLineBuffer, 70, fp) != NULL)
+	{
+		// convert the ssize_t length of character bytes into an integer
+		int myLineBufferSize = (int) strlen(myLineBuffer);
+		/*
+			Create a loop to check to see if there's a comma in the line using a boolean
+		*/
+		int i;
+		for(i = 0; i < myLineBufferSize; i++)
+		{
+			if(myLineBuffer[i] == comma)
+			{
+				check = true;
+				break;
+			}
+			check = false;
+		}
+		/*
+			Grab the entire line on the buffer then parse it for each word
+			Allocate(on a stack) an array of char that's is dependant on the size of the parsing word
+			Need to add a sentinel value('\0') at the end of the allocate char array for termination of the char array size
+			Use strncpy(string copy) function call to copy the parse word to the allocate char array
+			Store the char array to the pointer 
+		*/
+		if(check)
+		{
+			int wordBufferSize;
+
+			// airport code
+			word = strtok(myLineBuffer, "[  ] \t ");
+			wordBufferSize = (int) strlen(word);
+			char airportCode[wordBufferSize];
+			airportCode[wordBufferSize] = '\0';
+			char * airportCodePointer = airportCode;
+			strncpy(airportCode, word, wordBufferSize);
+			// printf("Airport Code: %s\n", airportCodePointer);
+
+			// latitude
+			word = strtok(NULL, " \t");
+			wordBufferSize = (int) strlen(word);
+			char latitude[wordBufferSize];
+			latitude[wordBufferSize] = '\0';
+			strncpy(latitude, word, wordBufferSize);
+			float latitudeFloat = atof(latitude);
+			// printf("Latitude: %f\n", latitudeFloat);
+
+			// longitude
+			word = strtok(NULL, "\t");
+			wordBufferSize = (int) strlen(word);
+			char longitude[wordBufferSize];
+			longitude[wordBufferSize] = '\0';
+			strncpy(longitude, word, wordBufferSize);
+			float longitudeFloat = atof(longitude);
+			// printf("Longitude: %f\n", longitudeFloat);
+
+			// city
+			word = strtok(NULL, ",");
+			wordBufferSize = (int) strlen(word);
+			char city[wordBufferSize];
+			city[wordBufferSize] = '\0';
+			char * cityPointer = city;
+			strncpy(city, word, wordBufferSize);
+			// printf("City: %s\n", cityPointer);
+
+			// state
+			word = strtok(NULL, "");
+			wordBufferSize = (int) strlen(word);
+			char state[wordBufferSize];
+			state[wordBufferSize] = '\0';
+			char * statePointer = state;
+			strncpy(state, word, wordBufferSize);
+			// printf("State: %s\n", statePointer);
+
+			node_t * head = NULL;
+			head = malloc(sizeof(node_t));
+			head->airportCode = airportCodePointer;
+			head->city = cityPointer;
+			head->state = statePointer;
+			head->next = NULL;
+			kd_insert2f(kd, latitudeFloat, longitudeFloat, head);
+			free(head);
+
+		}
+	}
+	
+	fclose(fp);
+	printf("initialize Data: done!!!\n");
+	if(kd == NULL) printf("It is freaking NULL\n");
 }
