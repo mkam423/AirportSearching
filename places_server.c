@@ -85,16 +85,16 @@ getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 		}
 	}
 
-	// airList_air walker = result_1->nearest_results_air_u.x;
-	// while(walker)
-	// {
-	// 	printf("Code: %s\n", walker->p.code);
-	// 	printf("Name: %s\n", walker->p.name);
-	// 	printf("Distance: %f\n", walker->p.dist);
-	// 	printf("Longitude: %f\n", walker->p.loc.longitude);
-	// 	printf("Latitude: %f\n", walker->p.loc.latitude);
-	// 	walker = walker->next;
-	// }
+	airList_air walker = result_1->nearest_results_air_u.x;
+	while(walker)
+	{
+		printf("Code: %s\n", walker->p.code);
+		printf("Name: %s\n", walker->p.name);
+		printf("Distance: %f\n", walker->p.dist);
+		printf("Longitude: %f\n", walker->p.loc.longitude);
+		printf("Latitude: %f\n", walker->p.loc.latitude);
+		walker = walker->next;
+	}
 
 	return &result;
 
