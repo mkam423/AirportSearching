@@ -67,7 +67,7 @@ main (int argc, char **argv)
   if(ifNotInitialized == 0)
 	{
 	  printf("Initialize data: \n");
-	  initializeData();
+	  initializeData(listOfState, listOfCityOrTownByState);
 
 	  ifNotInitialized = 1;
 	}
@@ -97,9 +97,6 @@ main (int argc, char **argv)
 
 	svc_run ();
 	fprintf (stderr, "%s", "svc_run returned");
-
-
-
 	exit (1);
 	/* NOTREACHED */
 }

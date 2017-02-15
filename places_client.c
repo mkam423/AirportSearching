@@ -28,19 +28,19 @@ placesprogram_1(char *host, place loc)
 		clnt_perror (clnt, "call failed");
 	}
 
-	// int i;
-	// if ( result_1->err == 0 ){
-	// 	printf("This is 5 closet airports:\n");
-	// 	airList_place walker = result_1->nearest_results_place_u.x;
-	// 	for(i = 0; i < 5; i++){
-	// 		printf("Airport Code: (%s)  (%s)\n", walker->p.code, walker->p.name);
-	// 		printf("Distant: (%d)\n", walker->p.dist);
-	// 		printf("(Longitude, Latitude): ( %d, %d)\n", walker->p.longitude, walker->p.latitude);
-	// 	}
-	// 	clnt_freeres (clnt, (xdrproc_t)xdr_nearest_results_place, (char*)result_1);
-	// } else {
-	// 	printf("There is an error on the server side!!!\n");
-	// }
+	int i;
+	if ( result_1->err == 0 ){
+		printf("This is 5 closet airports:\n");
+		airList_place walker = result_1->nearest_results_place_u.x;
+		for(i = 0; i < 5; i++){
+			printf("Airport Code: (%s)  (%s)\n", walker->p.code, walker->p.name);
+			printf("Distant: (%d)\n", walker->p.dist);
+			printf("(Longitude, Latitude): ( %d, %d)\n", walker->p.longitude, walker->p.latitude);
+		}
+		clnt_freeres (clnt, (xdrproc_t)xdr_nearest_results_place, (char*)result_1);
+	} else {
+		printf("There is an error on the server side!!!\n");
+	}
 
 
 #ifndef	DEBUG

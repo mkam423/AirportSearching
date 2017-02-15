@@ -41,6 +41,8 @@ getnearest_air_1_svc(geoLocation *argp, struct svc_req *rqstp)
 	static nearest_results_air result;
 	bool notInitialize = true;
 
+	//xdr_free((xdrproc_t)xdr_nearest_results_place, (char*)&result);
+
 	void *kd, *set, *presults;
 	//struct kdres *presults;
 	

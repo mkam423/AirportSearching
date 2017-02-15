@@ -7,7 +7,6 @@
 #include "places.h"
 #include "airports.h"
 #include "ctype.h"
-#include "errno.h"
 
 
 const nametype FILE_NAME = "places2k.txt";
@@ -19,21 +18,52 @@ const int UNCLEAR = -2;
 const int UNKNOWN = -3;
 
 
+// Self Declare struct - not by rpc
+/*typedef struct CityOrTown CityOrTown;
+struct CityOrTown
+{
+	nametype cityOrTownName;
+	double latitude;
+	double longitude;
+};
+
+typedef struct State State;
+struct State
+{
+	nametype stateName;
+	nametype stateAbbreviation;
+	int numberOfCityOrTown;
+	};*/
+//static int ifNotInitialized = 0;
+//void initializeData(State listOfState[], CityOrTown listOfCityOrTownByState[52][2000]);
 void initializeData();
+
 void lowerCase(char *x);
+
+//int getCoordinates(State listOfState[], CityOrTown listOfCityOrTownByState[52][2000]
+//				   ,place *pair, geoLocation *coord);
 int getCoordinates(place *pair, geoLocation *coord);
-void freeData();
 
 nearest_results_place *
 getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 {
   static nearest_results_place result;
+  /*	static nearest_results_place result;
+	static int ifNotInitialized = 0;
+	static State listOfState[52];
+	static CityOrTown listOfCityOrTownByState[52][2000];
+  */
+  /*
+	if(ifNotInitialized == 0)
+	{
+		printf("Initialize data: \n");
+		initializeData(listOfState, listOfCityOrTownByState);
 
-	//If state not 2 characters
-	if(strlen(argp->state) != 2){
-		result.err = EAGAIN;
-		perror("Invalid state.\n");
+		ifNotInitialized = 1;
 	}
+  */
+	//If state not 2 characters
+//if(strlen(argp->state) != 2)
   
 	  
 	/*
@@ -49,40 +79,29 @@ getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 	*/
 	xdr_free((xdrproc_t)xdr_nearest_results_air, (char*)&result);
 
-
-	lowerCase(argp->city);
-	lowerCase(argp->state);
-
-	printf("Received city: %s\n", argp->city);
-	printf("Received state: %s\n\n",argp->state);
+	//printf("Inside nearest_results_place\n");
+	printf("city: %s\n", argp->city);
+	printf("state: %s\n",argp->state);
 
 	CLIENT *clnt;
 	nearest_results_air  *result_1;
 	geoLocation getnearest_air_1_arg;
 	int num;
 	
+	//num = getCoordinates(listOfState, listOfCityOrTownByState, argp, &getnearest_air_1_arg);
 
 	num = getCoordinates(argp, &getnearest_air_1_arg);
 	if(num == 0){
 
-	  printf("Lat: %f, Long: %f\n\n", getnearest_air_1_arg.latitude,getnearest_air_1_arg.longitude);
-	} else if (num == BAD_STATE) {
-	  result.err = EAGAIN;
-	  perror("Not a state.\n");
-	  return (&result);
-
-	} else if (num == UNCLEAR){
-	  result.err = EAGAIN;
-	  perror("More specific city needed.\n");
-	  return (&result);
-
+	  printf("Lat: %f, Long: %f\n", getnearest_air_1_arg.latitude,getnearest_air_1_arg.longitude);
 	} else {
-	  result.err = EAGAIN;
-	  perror("Non existent city.\n");
-	  return (&result);
+
+	printf("THE RESULT OF NUM: %i\n",num);
+
 	}
-
-
+	//getnearest_air_1_arg.longitude = 91.12;
+	//getnearest_air_1_arg.latitude = 12.23;
+	/*
 // Touch on this later
 #ifndef DEBUG
 	clnt = clnt_create ("localhost", airportProgram, airport_version, "udp");
@@ -111,7 +130,7 @@ getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 		printf("Latitude: %f\n", walker->p.loc.latitude);
 		walker = walker->next;
 	}
-
+	*/
 	return &result;
 
 }
@@ -123,6 +142,7 @@ void lowerCase(char *x)
 		x[i] = tolower(x[i]);
 }
 
+//void initializeData(State listOfState[], CityOrTown listOfCityOrTownByState[52][2000])
 void initializeData()
 {
 	FILE * fp = NULL;
@@ -164,8 +184,6 @@ void initializeData()
 			// Initialize the state
 			listOfState[stateIndex].stateAbbreviation = malloc(2);
 			strncpy(listOfState[stateIndex].stateAbbreviation,line,2);
-			lowerCase(listOfState[stateIndex].stateAbbreviation);
-
 			cityOrTownIndex = listOfState[stateIndex].numberOfCityOrTown = 1;
 
 			// Add a city or town
@@ -175,8 +193,6 @@ void initializeData()
 			//line is a pointer + 9 to move to the next 10 char, if you can find a better way to do this, do it
 			//cuz this is rediculously stupid
 			strncpy(currentStatePointer[cityOrTownIndex-1].cityOrTownName, line + 9, 63);
-			lowerCase(currentStatePointer[cityOrTownIndex-1].cityOrTownName);
-			
 			strncpy(latitude, line+(144), 9);
 			strncpy(longitude, line+(154), 9);
 			currentStatePointer[cityOrTownIndex-1].latitude = strtod(latitude, NULL);
@@ -192,7 +208,7 @@ void initializeData()
 			currentStatePointer[cityOrTownIndex-1].cityOrTownName = malloc(MAXLEN);
 
 			strncpy(currentStatePointer[cityOrTownIndex-1].cityOrTownName, line + 9, 63);
-			lowerCase(currentStatePointer[cityOrTownIndex-1].cityOrTownName);
+
 
 			strncpy(latitude, line+(144), 9);
 			strncpy(longitude, line+(154), 9);
@@ -202,8 +218,8 @@ void initializeData()
 	}
 }
 
-
-
+//int getCoordinates(State listOfState[], CityOrTown listOfCityOrTownByState[52][2000],
+//						   place *pair, geoLocation *coord)
   int getCoordinates(place *pair, geoLocation *coord)
 {
       
@@ -226,18 +242,16 @@ void initializeData()
 
   int length = strlen(pair->city);
   
-  //Binary Search
   while (found == 0 && low <= high){
 	mid = (high + low)/2;
 	if(strncmp((listOfCityOrTownByState[index][mid].cityOrTownName),(pair->city),
-			   length) == 0){
+			  length) == 0)
 	  found = 1;
-	}else if (strncmp((listOfCityOrTownByState[index][mid].cityOrTownName),(pair->city),
-					  length) > 0){
+	else if (strncmp((listOfCityOrTownByState[index][mid].cityOrTownName),(pair->city),
+					length) > 0)
 	  high = mid - 1;
-	}else{
+	else
 	  low = mid + 1;
-	}
   }
 
   
@@ -258,40 +272,13 @@ void initializeData()
 	coord->longitude = listOfCityOrTownByState[index][mid].longitude;
 	coord->latitude = listOfCityOrTownByState[index][mid].latitude;
 
-	printf("City: %s\n",listOfCityOrTownByState[index][mid].cityOrTownName);
-	printf("State: %s\n",listOfState[index].stateAbbreviation);
 	return 0;
   }
-
-  //Not found
   return UNKNOWN;
 
   
 }
 
-
-void freeData()
-{
-	int i = 0;
-	int size;
-
-	//All States
-	for(i; i < NUMBER_OF_STATES; i++){
-		size = listOfState[i].numberOfCityOrTown;
-		if(size > 0){
-			int s = 0;
-
-			//All cities for each state
-			for(s; s < size; s++){
-				free(listOfCityOrTownByState[i][s].cityOrTownName);
-			}
-
-			free(listOfState[i].stateAbbreviation);
-			free(listOfState[i].stateName);
-		}
-	}
-
-}
 
 
 

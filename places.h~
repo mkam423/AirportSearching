@@ -50,25 +50,23 @@ typedef struct nearest_results_place nearest_results_place;
 
 
 
-typedef struct CityOrTown CityOrTown;
-struct CityOrTown
-{
+  typedef struct CityOrTown CityOrTown;
+  struct CityOrTown
+  {
 	nametype cityOrTownName;
 	double latitude;
 	double longitude;
-};
+  };
 
-typedef struct State State;
-struct State
-{
+  typedef struct State State;
+  struct State
+  {
 	nametype stateName;
 	nametype stateAbbreviation;
 	int numberOfCityOrTown;
-};
+  };
+  
 
-static int ifNotInitialized = 0;
-static State listOfState[52];
-static CityOrTown listOfCityOrTownByState[52][2000];
 
   
 #define placesProgram 0x12345678
