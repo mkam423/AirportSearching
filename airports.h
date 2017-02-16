@@ -33,6 +33,7 @@ typedef struct geoLocation geoLocation;
 struct nearAirport {
 	nametype_air code;
 	nametype_air name;
+	nametype_air state;
 	double dist;
 	geoLocation loc;
 };

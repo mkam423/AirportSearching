@@ -62,11 +62,11 @@ main (int argc, char **argv)
 {
 	register SVCXPRT *transp;
 
+	int ifNotInitialized = 0;
+
 	if(ifNotInitialized == 0)
 	{
-	  printf("Initialize data: \n");
 	  initializeData();
-
 	  ifNotInitialized = 1;
 	}
 

@@ -15,13 +15,9 @@ void initialize();
 void findNearest(nearest_results_air *result, double point[]);
 
 static double dist_sq(double *a1, double *a2, int dims);
-
 double distanceFormula(double lat1, double lon1, double lat2, double lon2);
-
 double deg2rad(double deg);
-
 double rad2deg(double rad);
-
 void free_air_node(airList_air head);
 
 nearest_results_air *
@@ -41,9 +37,23 @@ getnearest_air_1_svc(geoLocation *argp, struct svc_req *rqstp)
 
 	findNearest(&result, point);
 
-	printf("Find airports from these long and lat: \n");
-	printf("long: %f\n", argp->longitude);
-	printf("lat: %f\n", argp->latitude);
+	// airList_air walker = result.nearest_results_air_u.x;
+	// while(walker)
+	// {
+	// 	printf("Code: %s\n", walker->p.code);
+	// 	printf("Name: %s\n", walker->p.name);
+	// 	printf("State: %s\n",walker->p.state);
+	// 	printf("Distance: %f\n", walker->p.dist);
+	// 	printf("Longitude: %f\n", walker->p.loc.longitude);
+	// 	printf("Latitude: %f\n\n", walker->p.loc.latitude);
+	// 	walker = walker->next;
+	// }
+
+
+	// printf("Find airports from these long and lat: \n");
+	// printf("long: %f\n", argp->longitude);
+	// printf("lat: %f\n", argp->latitude);
+	// printf("Result Error: %i\n", result.err);
 
 	return &result;
 }
@@ -51,37 +61,29 @@ getnearest_air_1_svc(geoLocation *argp, struct svc_req *rqstp)
 void findNearest(nearest_results_air *result, double point[])
 {
 	void *presults, *pch;
-
 	double pos[2], distance;
-
 	airList_air walker = NULL;
-
-	// if(!result->nearest_results_air_u.x)
-	// {
-	// 	free_air_node(result->nearest_results_air_u.x);
-	// }
-
 	presults = kd_nearest_n(kd, point, 5);
+
+	//If we get something, we're good
 	if(kd_res_size(presults) > 0) result->err = 0;
+
+	//Copying Over
 	while(!kd_res_end(presults)) 
 	{
 		pch = kd_res_item(presults, pos);
-		
 		distance = distanceFormula(point[0], point[1], pos[0], pos[1]);
 
-		printf("node at (%.3f, %.3f) is %.3f away and has data = AirportCode:%s City:%s State:%s \n", pos[0], pos[1], distance, (char*)((struct node*)pch)->airportCode, (char*)((struct node*)pch)->city, (char*)((struct node*)pch)->state);
+		//printf("node at (%.3f, %.3f) is %.3f away and has data = AirportCode:%s City:%s State:%s \n", pos[0], pos[1], distance, (char*)((struct node*)pch)->airportCode, (char*)((struct node*)pch)->city, (char*)((struct node*)pch)->state);
 		
 		if(!result->nearest_results_air_u.x)
 		{
 			result->nearest_results_air_u.x = malloc(sizeof(airNode_air));
-
 			result->nearest_results_air_u.x->next = NULL;
-
 			result->nearest_results_air_u.x->p.code = strdup((char*)((struct node*)pch)->airportCode);
 			result->nearest_results_air_u.x->p.name = strdup((char*)((struct node*)pch)->city);
-
+			result->nearest_results_air_u.x->p.state = strdup((char*)((struct node*)pch)->state);
 			result->nearest_results_air_u.x->p.dist = distance;
-
 			result->nearest_results_air_u.x->p.loc.latitude = pos[0];
 			result->nearest_results_air_u.x->p.loc.longitude = pos[1];
 
@@ -95,7 +97,7 @@ void findNearest(nearest_results_air *result, double point[])
 			temp->next = NULL;
 			temp->p.code = strdup((char*)((struct node*)pch)->airportCode);
 			temp->p.name = strdup((char*)((struct node*)pch)->city);
-
+			temp->p.state = strdup((char*)((struct node*)pch)->state);
 			temp->p.dist = distance;
 			temp->p.loc.latitude = pos[0];
 			temp->p.loc.longitude = pos[1];
@@ -183,7 +185,7 @@ void initialize()
 			// printf("City: %s\n", cityPointer);
 
 			// state
-			word = strtok(NULL, "");
+			word = strtok(NULL, "\n");
 			wordBufferSize = (int) strlen(word);
 			char state[wordBufferSize];
 			state[wordBufferSize] = '\0';

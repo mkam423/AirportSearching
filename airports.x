@@ -10,6 +10,7 @@ typedef struct airNode_air* airList_air;
   struct nearAirport{
          nametype_air code;
          nametype_air name;
+	       nametype_air state;
          double dist;
          geoLocation loc;
   };
