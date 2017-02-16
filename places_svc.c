@@ -94,6 +94,8 @@ main (int argc, char **argv)
 
 	svc_run ();
 	fprintf (stderr, "%s", "svc_run returned");
+
+	freeData();
 	exit (1);
 	/* NOTREACHED */
 }

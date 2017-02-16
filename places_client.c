@@ -39,9 +39,13 @@ placesprogram_1(char *host, place info)
 		//Check possible errors
 		if ( result_1->err == 0 ){
 
-			printf("This is 5 closet airports to %s, %s:\n", 
-				result_1->nearest_results_place_u.info.search_location.city, 
+			printf("This is 5 closet airports to:\n");
+				printf("City:%s\n", 
+				result_1->nearest_results_place_u.info.search_location.city);
+				printf("State:%s\n", 
 				result_1->nearest_results_place_u.info.search_location.state);
+			printf("\n");
+
 			printf("Lat=%f, Lon=%f\n", 
 				result_1->nearest_results_place_u.info.coord.latitude,
 				result_1->nearest_results_place_u.info.coord.longitude);
@@ -54,8 +58,7 @@ placesprogram_1(char *host, place info)
 				printf("Name=%s, ", walker->p.name);
 				printf("State=%s, ", walker->p.state);
 				printf("Distance=%f, \n", walker->p.dist);
-				// printf("Longitude=%f, ", walker->p.loc.longitude);
-				// printf("Latitude=%f\n", walker->p.loc.latitude);
+
 				walker = walker->next;
 			}
 

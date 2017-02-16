@@ -129,7 +129,6 @@ void initializeData()
 
 	CityOrTown *currentStatePointer;
 
-	printf("Opening file: places2k.txt \n");
 	fp = fopen(FILE_NAME, "r");
 
 	

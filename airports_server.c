@@ -37,24 +37,6 @@ getnearest_air_1_svc(geoLocation *argp, struct svc_req *rqstp)
 
 	findNearest(&result, point);
 
-	// airList_air walker = result.nearest_results_air_u.x;
-	// while(walker)
-	// {
-	// 	printf("Code: %s\n", walker->p.code);
-	// 	printf("Name: %s\n", walker->p.name);
-	// 	printf("State: %s\n",walker->p.state);
-	// 	printf("Distance: %f\n", walker->p.dist);
-	// 	printf("Longitude: %f\n", walker->p.loc.longitude);
-	// 	printf("Latitude: %f\n\n", walker->p.loc.latitude);
-	// 	walker = walker->next;
-	// }
-
-
-	// printf("Find airports from these long and lat: \n");
-	// printf("long: %f\n", argp->longitude);
-	// printf("lat: %f\n", argp->latitude);
-	// printf("Result Error: %i\n", result.err);
-
 	return &result;
 }
 
@@ -155,7 +137,6 @@ void initialize()
 			airportCode[wordBufferSize] = '\0';
 			char * airportCodePointer = airportCode;
 			strncpy(airportCode, word, wordBufferSize);
-			// printf("Airport Code: %s\n", airportCodePointer);
 
 			// latitude
 			word = strtok(NULL, " \t");
@@ -164,7 +145,7 @@ void initialize()
 			latitude[wordBufferSize] = '\0';
 			strncpy(latitude, word, wordBufferSize);
 			float latitudeFloat = atof(latitude);
-			// printf("Latitude: %f\n", latitudeFloat);
+
 
 			// longitude
 			word = strtok(NULL, "\t");
@@ -173,7 +154,7 @@ void initialize()
 			longitude[wordBufferSize] = '\0';
 			strncpy(longitude, word, wordBufferSize);
 			float longitudeFloat = atof(longitude);
-			// printf("Longitude: %f\n", longitudeFloat);
+
 
 			// city
 			word = strtok(NULL, ",");
@@ -182,7 +163,6 @@ void initialize()
 			city[wordBufferSize] = '\0';
 			char * cityPointer = city;
 			strncpy(city, word, wordBufferSize);
-			// printf("City: %s\n", cityPointer);
 
 			// state
 			word = strtok(NULL, "\n");
@@ -191,7 +171,6 @@ void initialize()
 			state[wordBufferSize] = '\0';
 			char * statePointer = state;
 			strncpy(state, word, wordBufferSize);
-			// printf("State: %s\n", statePointer);
 
 			node_t * head = NULL;
 			head = malloc(sizeof(node_t));
