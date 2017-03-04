@@ -46,6 +46,8 @@ xdr_nearAirport (XDR *xdrs, nearAirport *objp)
 		 return FALSE;
 	 if (!xdr_nametype_air (xdrs, &objp->name))
 		 return FALSE;
+	 if (!xdr_nametype_air (xdrs, &objp->state))
+		 return FALSE;
 	 if (!xdr_double (xdrs, &objp->dist))
 		 return FALSE;
 	 if (!xdr_geoLocation (xdrs, &objp->loc))

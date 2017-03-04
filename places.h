@@ -7,8 +7,7 @@
 #define _PLACES_H_RPCGEN
 
 #include <rpc/rpc.h>
-#include "ctype.h"
-#include "errno.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,6 +19,7 @@ typedef char *nametype;
 
 typedef struct airNode_place *airList_place;
 
+
 struct geoLocation_place {
 	double longitude;
 	double latitude;
@@ -29,6 +29,7 @@ typedef struct geoLocation_place geoLocation_place;
 struct airportInfo {
 	nametype code;
 	nametype name;
+	nametype state;
 	double dist;
 	geoLocation_place loc;
 };
@@ -46,10 +47,17 @@ struct place {
 };
 typedef struct place place;
 
+struct location_and_airports {
+	airList_place x;
+	geoLocation_place coord;
+	place search_location;
+};
+typedef struct location_and_airports location_and_airports;
+
 struct nearest_results_place {
 	int err;
 	union {
-		airList_place x;
+		location_and_airports info;
 	} nearest_results_place_u;
 };
 typedef struct nearest_results_place nearest_results_place;
@@ -95,6 +103,7 @@ extern int placesprogram_1_freeresult ();
 #if defined(__STDC__) || defined(__cplusplus)
 extern  bool_t xdr_nametype (XDR *, nametype*);
 extern  bool_t xdr_airList_place (XDR *, airList_place*);
+extern  bool_t xdr_location_and_airports (XDR *, location_and_airports*);
 extern  bool_t xdr_geoLocation_place (XDR *, geoLocation_place*);
 extern  bool_t xdr_airportInfo (XDR *, airportInfo*);
 extern  bool_t xdr_airNode_place (XDR *, airNode_place*);
@@ -104,6 +113,7 @@ extern  bool_t xdr_nearest_results_place (XDR *, nearest_results_place*);
 #else /* K&R C */
 extern bool_t xdr_nametype ();
 extern bool_t xdr_airList_place ();
+extern bool_t xdr_location_and_airports ();
 extern bool_t xdr_geoLocation_place ();
 extern bool_t xdr_airportInfo ();
 extern bool_t xdr_airNode_place ();

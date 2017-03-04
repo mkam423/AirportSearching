@@ -10,6 +10,7 @@ typedef struct airNode_place* airList_place;
   struct airportInfo{
          nametype code;
          nametype name;
+	       nametype state;
          double dist;
          geoLocation_place loc;
   };
@@ -24,10 +25,16 @@ typedef struct airNode_place* airList_place;
       	 nametype city;
     	   nametype state;
   };
+  
+  struct location_and_airports {
+         airList_place x;
+	       geoLocation_place coord;
+         place search_location;
+  };
 
   union nearest_results_place switch (int err) {
   	case 0:
-	     airList_place x; 
+	     location_and_airports info; 
 	default:
 		void;
   }; 

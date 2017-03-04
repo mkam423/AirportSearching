@@ -17,16 +17,15 @@ const int UNKNOWN = -3;
 
 void initializeData();
 void lowerCase(char *x);
-int getCoordinates(place *pair, geoLocation *coord);
+int getCoordinates(place *pair, geoLocation *coord,place *actual);
 void freeData();
-airList_place copy_node(airList_place head);
 
 nearest_results_place *
 getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 {
 	static nearest_results_place result;
 	result.err = 1;
-	result.nearest_results_place_u.x = NULL;
+	result.nearest_results_place_u.info.x = NULL;
 
 	//If state not 2 characters
 	if(strlen(argp->state) != 2){
@@ -34,21 +33,25 @@ getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 		perror("Invalid state.\n");
 	}
 
+	//Free Memory
 	xdr_free((xdrproc_t)xdr_nearest_results_place, (char*)&result);
 
+	//Case-insensitive everything
 	lowerCase(argp->city);
 	lowerCase(argp->state);
 
+	//Set up airport client
 	CLIENT *clnt;
-	nearest_results_air  *result_1;
-	geoLocation getnearest_air_1_arg;
-	int num;
+	nearest_results_air *result_1;
+	geoLocation getnearest_air_1_arg; //arg for airport server
+	int num; //Holds result of function
+	place found; //Holds actual place
 	
-	num = getCoordinates(argp, &getnearest_air_1_arg);
-	if(num == 0){
 
-	  printf("Lat: %f, Long: %f\n\n", getnearest_air_1_arg.latitude,getnearest_air_1_arg.longitude);
-	} else if (num == BAD_STATE) {
+	num = getCoordinates(argp, &getnearest_air_1_arg, &found);
+
+	//Check if any problems
+	if (num == BAD_STATE) {
 	  result.err = BAD_STATE;
 	  perror("Not a state.\n");
 	  return (&result);
@@ -58,14 +61,13 @@ getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 	  perror("More specific city needed.\n");
 	  return (&result);
 
-	} else {
+	} else if (num == UNKNOWN){
 	  result.err = UNKNOWN;
 	  perror("Non existent city.\n");
 	  return (&result);
 	}
 
 
-// Touch on this later
 #ifndef DEBUG
 	clnt = clnt_create ("localhost", airportProgram, airport_version, "udp");
 	if (clnt == NULL) {
@@ -78,14 +80,18 @@ getnearest_place_1_svc(place *argp, struct svc_req *rqstp)
 	if (result_1 == (nearest_results_air *) NULL) {
 		clnt_perror (clnt, "call failed");
 	} else{
+		//Copy all the data to be returned
 		if (result_1->err == 0){
 			result.err = 0;
-			result.nearest_results_place_u.x = (airList_place)result_1->nearest_results_air_u.x;
-
+			result.nearest_results_place_u.info.search_location = found;
+			result.nearest_results_place_u.info.coord.latitude = getnearest_air_1_arg.latitude;
+			result.nearest_results_place_u.info.coord.longitude = getnearest_air_1_arg.longitude;
+			result.nearest_results_place_u.info.x = (airList_place)result_1->nearest_results_air_u.x;
+			
+			//Free of result_1 is in client after reading 
 		}
 	}
-
-	//clnt_freeres (clnt, (xdrproc_t)xdr_nearest_results_air, (char*)result_1);
+	
 	return &result;
 }
 
@@ -96,9 +102,12 @@ void lowerCase(char *x)
 		x[i] = tolower(x[i]);
 }
 
+//Memory for Data structure is free in the places_svc.c main
+//Below defines freedata() function that does the work
 void initializeData()
 {
 	FILE * fp = NULL;
+
 
 	nametype previousState;
 	previousState = malloc(MAXLEN);
@@ -120,7 +129,6 @@ void initializeData()
 
 	CityOrTown *currentStatePointer;
 
-	printf("Opening file: places2k.txt \n");
 	fp = fopen(FILE_NAME, "r");
 
 	
@@ -156,24 +164,34 @@ void initializeData()
 		}
 		else
 		{
+			//+1 city
 			cityOrTownIndex = ++listOfState[stateIndex].numberOfCityOrTown;
 
 			// Add a city or town
 			currentStatePointer = listOfCityOrTownByState[stateIndex];
 			currentStatePointer[cityOrTownIndex-1].cityOrTownName = malloc(MAXLEN);
 
+			//Name
 			strncpy(currentStatePointer[cityOrTownIndex-1].cityOrTownName, line + 9, 63);
 			lowerCase(currentStatePointer[cityOrTownIndex-1].cityOrTownName);
 
+			//Lat and long copy
 			strncpy(latitude, line+(143), 9);
 			strncpy(longitude, line+(153), 9);
 			currentStatePointer[cityOrTownIndex-1].latitude = strtod(latitude, NULL);
 			currentStatePointer[cityOrTownIndex-1].longitude = strtod(longitude, NULL);
 		}
 	}
+
+	free(previousState);
+	free(currentState);
+	free(line);
+	free(latitude);
+	free(longitude);
+
 }
 
-int getCoordinates(place *pair, geoLocation *coord)
+int getCoordinates(place *pair, geoLocation *coord, place *actual)
 {
       
   int index = 0; //For State
@@ -224,13 +242,15 @@ int getCoordinates(place *pair, geoLocation *coord)
 			    (pair->city),length) == 0)
 		return UNCLEAR;
 
+	//Copy for Airport Server
 	coord->longitude = listOfCityOrTownByState[index][mid].longitude;
 	coord->latitude = listOfCityOrTownByState[index][mid].latitude;
-	pair->city = strdup(listOfCityOrTownByState[index][mid].cityOrTownName);
-	pair->state = strdup(listOfState[index].stateAbbreviation);
 
-	printf("City: %s\n",listOfCityOrTownByState[index][mid].cityOrTownName);
-	printf("State: %s\n",listOfState[index].stateAbbreviation);
+	//Copy actual location found for Places Client
+	actual->city = strdup(listOfCityOrTownByState[index][mid].cityOrTownName);
+	actual->state = strdup(listOfState[index].stateAbbreviation);
+
+
 	return 0;
   }
 
@@ -240,6 +260,7 @@ int getCoordinates(place *pair, geoLocation *coord)
   
 }
 
+//Free is called in places stub main
 void freeData()
 {
 	int i = 0;
@@ -267,45 +288,3 @@ char * getStateName(int index)
 {
 	return NULL;
 }
-
-// airList_place copy_node(airList_place head)
-// {
-// 	airList_place temp_head, walker;
-// 	while(head->next)
-// 	{
-// 		if(!temp_head)
-// 		{
-// 			temp_head = malloc(sizeof(airNode_air));
-
-// 			temp_head->next = NULL;
-
-// 			temp_head->p.code = head->p.code;
-// 			temp_head->p.name = head->p.name;
-
-// 			temp_head->p.dist = head->p.dist;
-
-// 			temp_head->p.loc.latitude = head->p.loc.latitude;
-// 			temp_head->p.loc.longitude = head->p.loc.longitude;
-
-// 			// Keeping track of the tail
-// 			walker = temp_head;
-// 		}
-// 		else
-// 		{
-// 			airList_air temp = malloc(sizeof(airNode_air));
-
-// 			temp->next = NULL;
-// 			temp->p.code = head->p.code;
-// 			temp->p.name = head->p.name;
-
-// 			temp->p.dist = head->p.dist;
-// 			temp->p.loc.latitude = head->p.loc.latitude;
-// 			temp->p.loc.longitude = head->p.loc.longitude;
-
-// 			walker->next = temp;
-// 			walker = temp;
-// 		}
-// 	}
-
-// 	return temp_head;
-// }

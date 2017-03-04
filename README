@@ -1,0 +1,84 @@
+Dan Doan, Steven Nguyen, Mason Kam
+------------------------------------------------------------
+Team Members and Contribution: 
+------------------------------------------------------------
+Dan Doan:
+In charge of the airports server and the creation of kd-tree structure to handle data. 
+Handles input of longitude and latitude and searches through a constructed kd-tree from data in 
+airports.txt to find locations and implements methodology to return 5 nearest neighbors. 
+Researched many libraries and methods in order for the kd-tree to function properly.
+
+Steven Nguyen:
+In charge of the communication between places client and places server, and the communication between 
+places server and airports server. Designed the mode of connecting the two servers together. 
+Implemented the data structure for the places server and stored the data from places2k.txt into the 
+data structure. Also assisted on the functionality of the airports server ensuring the kd-tree 
+methodology. Co-worked on the Makefile.
+
+Mason Kam:
+Designed the methodology for the places server data structure and algorithm to store and search 
+for a given place. Implemented a modified binary search algorithm in the places server in order 
+to be able to account for prefixes of places and the possible multiple results. Handle cases where 
+we have bad or unclear inputs and ensure that client is notified. Manipulated search to be case 
+insensitive for ease of use. Also designed IDL programs and established connection between servers 
+and clients. Co-worked on the Makefile.
+
+------------------------------------------------------------
+Data Structures and Algorithms Used:
+------------------------------------------------------------
+Places Server:
+-1D Array to hold states
+-2D [State Index] [City Index] - Used to store the cities for corresponding state
+-Linear search to find corresponding state (since state abbreviations are not in order even though 
+states are AKA -> Maine = ME ...comes before... Maryland = MD)
+-Binary search on the 2D array corresponding to given state index (since cities are in order)
+-If found matching prefix, look above and below one index if possible to check if we also have a 
+matching prefix. This let’s us check if we have to ask user to specify input.
+
+Airports Server:
+-Kd-tree to find nearest neighbor
+
+5-Nearest return:
+-Linked list of 5 nearest neighbors to return to client
+
+
+------------------------------------------------------------
+3rd Party Code:
+------------------------------------------------------------
+(Insert kd tree library)
+https://github.com/jtsiomb/kdtree 
+
+------------------------------------------------------------
+Strengths:
+------------------------------------------------------------
+-Binary search is extremely efficient in the places server to find cities (prefixed)
+
+-Places server takes into account bad state input, bad city input, unclear input, and is case 
+insensitive. If input is bad, airports server is not called, error message prints, and error
+ number is set.
+
+-Communication between the servers is clean and connected
+
+-Data is read from places2k.txt once at runtime for places server prior to function call
+
+------------------------------------------------------------
+Weaknesses:
+------------------------------------------------------------
+-Currently the array for places server to hold data is static. Wanted avoid the memory leak problems 
+for a dynamically allocated array. Also did this because we would have to read all the cities for a
+state before we know how much memory to allocate for each state in 2D array.
+
+-Search for state in places server is linear due to non-ordered read of states (See above for reason).
+ Could not find a better way to avoid this yet since we read the cities simultaneously into the 2D 
+ array to avoid double reading of txt file. 
+
+------------------------------------------------------------
+Instructions to run
+------------------------------------------------------------
+-Make
+-Run ./airports_server&
+-Run ./places_server&
+-Run ./places_client localhost “city” state
+-Kill servers when done
+
+*state must be 2 chars, otherwise it is considered not a valid input.

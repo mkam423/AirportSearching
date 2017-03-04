@@ -19,6 +19,7 @@ placesprogram_1(char *host, place info)
 	getnearest_place_1_arg.city = info.city;
 	getnearest_place_1_arg.state = info.state;
 
+//Create connection
 #ifndef	DEBUG
 	clnt = clnt_create (host, placesProgram, places_version, "udp");
 	if (clnt == NULL) {
@@ -27,23 +28,40 @@ placesprogram_1(char *host, place info)
 	}
 #endif	/* DEBUG */
 
+	//Request to server
 	result_1 = getnearest_place_1(&getnearest_place_1_arg, clnt);
 	if (result_1 == (nearest_results_place *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
 	else
 	{
-		int i;
+
+		//Check possible errors
 		if ( result_1->err == 0 ){
-			printf("This is 5 closet airports:\n");
-			airList_place walker = result_1->nearest_results_place_u.x;
-			for(i = 0; i < 5; i++){
-				printf("%s%s\n", getnearest_place_1_arg.city, getnearest_place_1_arg.state);
-				printf("\nAirport Code: (%s)  (%s)\n", walker->p.code, walker->p.name);
-				printf("Distant: (%f)\n", walker->p.dist);
-				printf("(Longitude, Latitude): ( %f, %f)\n", walker->p.loc.longitude, walker->p.loc.latitude);
+
+			printf("This is 5 closet airports to:\n");
+				printf("City:%s\n", 
+				result_1->nearest_results_place_u.info.search_location.city);
+				printf("State:%s\n", 
+				result_1->nearest_results_place_u.info.search_location.state);
+			printf("\n");
+
+			printf("Lat=%f, Lon=%f\n", 
+				result_1->nearest_results_place_u.info.coord.latitude,
+				result_1->nearest_results_place_u.info.coord.longitude);
+
+			//Linked list traversal of nearest
+			airList_place walker = result_1->nearest_results_place_u.info.x;
+			while(walker)
+			{
+				printf("Code=%s, ", walker->p.code);
+				printf("Name=%s, ", walker->p.name);
+				printf("State=%s, ", walker->p.state);
+				printf("Distance=%f, \n", walker->p.dist);
+
 				walker = walker->next;
 			}
+
 			clnt_freeres (clnt, (xdrproc_t)xdr_nearest_results_place, (char*)result_1);
 		} 
 		else if (result_1->err == BAD_STATE)
@@ -76,6 +94,8 @@ main (int argc, char *argv[])
 	char *host;
 	place loc;
 
+	printf("\n\n");
+
 	if (argc < 2) {
 		printf ("usage: %s server_host\n", argv[0]);
 		exit (1);
@@ -85,5 +105,8 @@ main (int argc, char *argv[])
 	loc.state = argv[3];
 
 	placesprogram_1 (host, loc);
+
+	printf("\n\n");
+
 	exit (0);
 }

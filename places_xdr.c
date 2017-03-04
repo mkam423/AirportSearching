@@ -46,6 +46,8 @@ xdr_airportInfo (XDR *xdrs, airportInfo *objp)
 		 return FALSE;
 	 if (!xdr_nametype (xdrs, &objp->name))
 		 return FALSE;
+	 if (!xdr_nametype (xdrs, &objp->state))
+		 return FALSE;
 	 if (!xdr_double (xdrs, &objp->dist))
 		 return FALSE;
 	 if (!xdr_geoLocation_place (xdrs, &objp->loc))
@@ -78,6 +80,20 @@ xdr_place (XDR *xdrs, place *objp)
 }
 
 bool_t
+xdr_location_and_airports (XDR *xdrs, location_and_airports *objp)
+{
+	register int32_t *buf;
+
+	 if (!xdr_airList_place (xdrs, &objp->x))
+		 return FALSE;
+	 if (!xdr_geoLocation_place (xdrs, &objp->coord))
+		 return FALSE;
+	 if (!xdr_place (xdrs, &objp->search_location))
+		 return FALSE;
+	return TRUE;
+}
+
+bool_t
 xdr_nearest_results_place (XDR *xdrs, nearest_results_place *objp)
 {
 	register int32_t *buf;
@@ -86,7 +102,7 @@ xdr_nearest_results_place (XDR *xdrs, nearest_results_place *objp)
 		 return FALSE;
 	switch (objp->err) {
 	case 0:
-		 if (!xdr_airList_place (xdrs, &objp->nearest_results_place_u.x))
+		 if (!xdr_location_and_airports (xdrs, &objp->nearest_results_place_u.info))
 			 return FALSE;
 		break;
 	default:
